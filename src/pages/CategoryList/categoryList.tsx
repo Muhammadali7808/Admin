@@ -1,129 +1,99 @@
-import React from "react";
-import { Table, message, Button } from "antd";
-import { Link, useNavigate } from "react-router-dom";
-import { useCatalogGet } from "./service/mutate/useCatalogGet";
-import { useProductDelete } from "./service/mutate/usePutCategory";
-interface Category {
-  id: number;
-  title: string;
-  image: string;
-  children: Category[];
-}
+import { Button, Image, message, Table, Space } from "antd";
+import { useGetProducts } from "./service/query/useGetProducts";
+import { Link } from "react-router-dom";
+import { ColumnsType } from "antd/es/table";
+import { useDeleteItems } from "./service/mutation/useDeleteItems";
 
-export const CategoryList: React.FC = () => {
-  const { data, isLoading, isError, error, refetch } = useCatalogGet();
-  const navigate = useNavigate();
-  const { mutate: deleteCategory, isLoading: isDeleting } = useProductDelete();
+export const CategoryList = () => {
+  const { data } = useGetProducts();
+  const { mutate } = useDeleteItems();
 
-  if (isLoading) {
-    return <p>Loading categories...</p>;
-  }
-
-  if (isError) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to load categories";
-    message.error(errorMessage);
-    return <p>{errorMessage}</p>;
-  }
-  // getCatalogId(navigate?.id)
-
-  const handleDelete = (id: number) => {
-    deleteCategory(id, {
+  const deleteUser = (id: number) => {
+    mutate(id, {
       onSuccess: () => {
-        message.success("Category deleted successfully!");
-        refetch();
+        message.success("Successfully deleted!");
       },
       onError: () => {
-        message.error("Failed to delete category!");
-      },
+        message.error("Failed to delete the category.");
+      }
     });
   };
 
-  const columns = [
+  const dataSource = data?.results?.map((item) => ({
+    key: item.id,
+    id: item.id,
+    img: item.image,
+    title: item.title,
+  }));
+
+  const columns: ColumnsType = [
     {
-      title: "Title",
-      dataIndex: "title",
-      key: "title",
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: '10%',
+      align: 'center',
     },
     {
-      title: "Image",
-      dataIndex: "image",
-      key: "image",
-      render: (image: string) =>
-        image ? (
-          <img src={image} alt="category" style={{ width: 50, height: 50 }} />
-        ) : (
-          <span>No Image</span>
-        ),
+      title: 'Image',
+      dataIndex: 'img',
+      key: 'img',
+      render: (image) => <Image src={image} alt="category" width={80} height={70} />,
+      width: '15%',
+      align: 'center',
     },
     {
-      title: "Children Count",
-      dataIndex: "children",
-      key: "children",
-      render: (children: Category[] | undefined) =>
-        children ? children.length : 0,
+      title: 'Name',
+      dataIndex: 'title',
+      key: 'title',
+      width: '35%',
+      ellipsis: true, 
     },
     {
-      title: "Edit",
-      key: "actions",
-      render: (record: Category) => (
-        <Link to={`/app/create-category/${record.id}`}>
+      title: 'Actions',
+      dataIndex: 'change',
+      key: 'change',
+      render: (_, record) => (
+        <Space size="middle">
+          <Link to={`/app/edit/${record.id}`}>
+            <Button type="primary" className="action-btn">
+              Edit
+            </Button>
+          </Link>
           <Button
-            type="link"
-            onClick={() => navigate(`/app/create-category/${record.id}`, { state: { category: record } })}
-            style={{
-              marginRight: 8,
-              background: "green",
-              color: "#fff",
-              fontSize: "18px",
-              fontWeight: "400",
-            }}
-          >
-            Edit
-          </Button>
-        </Link>
-      ),
-    },
-    {
-      title: "Delete",
-      key: "actions",
-      render: (record: Category) => {
-        return (
-          <Button
-            style={{
-              background: "red",
-              color: "#fff",
-              fontSize: "18px",
-              fontWeight: "400",
-            }}
-            type="link"
+            onClick={() => deleteUser(record.id)}
+            type="primary"
             danger
-            onClick={() => handleDelete(record.id)}
-            loading={isDeleting}
+            className="action-btn"
           >
             Delete
           </Button>
-        );
-      },
-    },
+        </Space>
+      ),
+      width: '40%',
+      align: 'center', 
+    }
   ];
 
   return (
-    <>
-      <Button
-        style={{ marginBottom: 16 }}
-        type="primary"
-        onClick={() => navigate("/app/create-categor0y")}
-      >
-        Create Category
-      </Button>
-      <Table<Category>
+    <div className="table-wrapper">
+      <Space className="action-space">
+        <Link to={'/app/create'}>
+          <Button type="primary" size="large" className="create-btn" style={{
+            marginBottom: '20px',
+          }}>
+            Create
+          </Button>
+        </Link>
+      </Space>
+      <Table
         columns={columns}
-        dataSource={data?.results || []}
-        rowKey="id"
-        size="middle"
+        dataSource={dataSource}
+        bordered
         pagination={{ pageSize: 5 }}
+        scroll={{ x: 'max-content' }}
+        className="custom-table"
       />
-    </>
+    </div>
   );
 };

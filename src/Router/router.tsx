@@ -1,25 +1,22 @@
-import { Route, Routes } from "react-router-dom";
+import { Login } from "../pages/SignIn";
 import { MainLayout } from "../layout/main-layout";
-import { SingIn } from "../pages/sing-in/sing-in";
-import { Home } from "../pages/home/home";
-import { Product } from "../pages/Product/product";
-import { BrandList } from "../pages/BrandList/brandlist";
-import { SubCategoryList } from "../pages/SubCategoryList/subCategoryList";
-import { CreateCategory } from "../pages/CategoryList/createCategory";
+import { Routes, Route } from "react-router-dom";
 import { CategoryList } from "../pages/CategoryList/categoryList";
+import { Create } from "../pages/CreateCategory";
+import { EditCategory } from "../pages/EditCategory";
+import { SubCategory } from "../pages/SubCategory";
+
 
 const Router = () => {
     return (
         <>
             <Routes>
-                <Route path="/" element={<SingIn />} />
-                <Route path="app" element={<MainLayout />}>
-                    <Route index element={<Home />} />
-                    <Route path="category-list" element={<CategoryList />} />
-                    <Route path="sub-category-list" element={<SubCategoryList />} />
-                    <Route path="brand-list" element={<BrandList />} />
-                    <Route path="product" element={<Product />} />
-                    <Route path="create-category/:id" element={<CreateCategory />} />
+                <Route path="/" element={<Login />} />
+                <Route path="/app" element={<MainLayout />}>
+                    <Route index element={<CategoryList />} />
+                    <Route path="/app/create" element={<Create />} />
+                    <Route path="/app/edit/:id" element={<EditCategory />} />
+                    <Route path="/app/sub-category" element={<SubCategory />} />
                 </Route>
             </Routes>
         </>

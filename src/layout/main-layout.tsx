@@ -1,95 +1,46 @@
-import React, { useState } from 'react';
-import { AppstoreOutlined, CopyOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ShoppingOutlined, TrademarkCircleOutlined } from '@ant-design/icons';
-import { Button, Layout, Menu, theme } from 'antd';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { Layout, Menu } from "antd"
+import Sider from "antd/es/layout/Sider"
+import { Link, Navigate, Outlet } from "react-router-dom"
+import { LayoutData } from "./layoutData"
+import React from "react"
+import Cookies from "js-cookie"
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout
+
+const data = LayoutData.map((item)=> {
+  return {
+    key: `sub${item.id}`,
+    icon: React.createElement(item.icon),
+    label: (
+      <Link style={{fontSize:`16px`, fontWeight: 500}} to={item.path}>
+        {item.label}
+      </Link>
+    )
+  }
+})
 
 export const MainLayout: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
-
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
-  const handleMenuClick = (key: string) => {
-    switch (key) {
-      case '1':
-        navigate('/app/category-list');
-        break;
-      case '2':
-        navigate('/app/sub-category-list');
-        break;
-      case '3':
-        navigate('/app/brand-list');
-        break;
-      case '4':
-        navigate('/app/product');
-        break;
-      default:
-        break;
-    }
-  };
-
+  if(!Cookies.get("Token")){
+    return <Navigate to="/" replace={true}/>
+  } 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed}>
-        <div className="demo-logo-vertical" />
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={['1']}
-          onClick={({ key }) => handleMenuClick(key)}
-          items={[
-            {
-              key: '1',
-              icon: <AppstoreOutlined />,
-              label: 'Category List',
-            },
-            {
-              key: '2',
-              icon: <CopyOutlined />,
-              label: 'Sub Category List',
-            },
-            {
-              key: '3',
-              icon: <TrademarkCircleOutlined />,
-              label: 'Brand List',
-            },
-            {
-              key: '4',
-              icon: <ShoppingOutlined />,
-              label: 'Product',
-            },
-          ]}
-        />
-      </Sider>
-      <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{
-              fontSize: '16px',
-              width: 64,
-              height: 64,
-            }}
-          />
-        </Header>
-        <Content
-          style={{
-            margin: '24px 16px',
-            padding: 24,
-            minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-          }}
-        >
-          <Outlet />
-        </Content>
+      <Layout style={{ minHeight: '100vh', inset: 0}}>
+          <Header style={{ display: 'flex', alignItems: 'center'}}>
+            <div className="demo-logo" />
+            <Menu theme="dark"  mode="horizontal" defaultSelectedKeys={['2']} items={[{label: 'ADMIN PANEL PROJECT', key: '1'}]} style={{flex: 1, minWidth: 0, fontSize:`18px`, fontWeight: 600}}/>
+          </Header>
+          <Layout>
+            <Sider width={300}>
+              <Menu mode="inline" defaultSelectedKeys={['1']} defaultOpenKeys={['sub1']} style={{ height: '100%', borderRight: 0 }} items={data}/>
+            </Sider>
+            <Layout style={{ padding: '0 24px 24px' }}>
+              <Content style={{ padding: '24px', margin: 0, paddingTop: 40 }}>
+                <div className="content-wrapper">
+                  <Outlet/>
+                </div>
+              </Content>
+            </Layout>
+          </Layout>
       </Layout>
-    </Layout>
-  );
-};
+  )
+}
